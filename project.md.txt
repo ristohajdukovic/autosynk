@@ -1,0 +1,163 @@
+# Product Requirements Document (PRD)
+
+## Product Name
+**AutoSync**
+
+**Version:** MVP v1.0  
+**Prepared for:** AI Development Agent  
+**Prepared by:** [Founder Name]  
+
+---
+
+## 1. Product Summary
+AutoSync is a mobile app that helps car owners automatically track and manage routine vehicle maintenance.  
+It eliminates manual record-keeping by allowing users to upload odometer photos, get AI-based mileage detection, receive maintenance reminders, and store all service records digitally.  
+The MVP focuses on simplicity: fast setup, smart reminders, and a clear digital logbook.  
+
+---
+
+## 2. Target Users
+- **Primary:** Individual car owners who want to keep maintenance organized without hardware devices.  
+- **Secondary:** Used car buyers who want a transparent digital service history.  
+- **Tertiary:** Small garages/mechanics that could later integrate records for clients.  
+
+---
+
+## 3. Core Problem
+Car owners forget or lose track of scheduled maintenance and paper records.  
+There’s no simple app that uses mileage photos + reminders + digital history to automate this process.  
+
+---
+
+## 4. Goals for MVP
+- Reduce friction in tracking car maintenance.  
+- Automatically extract mileage from photos.  
+- Provide basic, reliable reminders for maintenance tasks.  
+- Build a shareable, exportable digital maintenance logbook.  
+
+---
+
+## 5. Core Features (MVP Scope)
+
+### A. User Onboarding
+- Sign-up with email, Google, or Apple.  
+- Add car by:
+  - Entering make, model, year manually.  
+  - Scanning VIN (optional).  
+- Set up base mileage (manual input or odometer photo).  
+
+### B. Odometer Recognition (AI Feature)
+- Upload photo → OCR reads numeric mileage.  
+- Confidence score shown; user can edit mileage if OCR is uncertain.  
+- Store image + extracted value + timestamp.  
+
+### C. Smart Maintenance Reminders
+- Auto-generated reminder list based on car model and average intervals (oil, filters, brakes, inspections).  
+- Users can add custom maintenance types.  
+- Notifications triggered by:
+  - Mileage thresholds (e.g., every 10,000 km).  
+  - Time thresholds (e.g., 6 months).  
+
+### D. Digital Logbook
+- CRUD structure:
+  - **Create:** Add service record (title, date, mileage, cost, notes).  
+  - **Read:** View past services sorted by date/mileage.  
+  - **Update/Delete:** Edit or remove entries.  
+- **OCR Receipt Scanning:** optional; upload mechanic receipt → extract service details.  
+
+### E. Timeline View
+- Horizontal scroll timeline showing:
+  - Past services (green)  
+  - Upcoming maintenance (orange)  
+  - Overdue items (red)  
+- Each entry opens detail view (service name, notes, photo attachments).  
+
+### F. PDF Export
+- Generate “Digital Service Book” PDF with:
+  - Vehicle info  
+  - Maintenance history (chronological list)  
+  - Attached images (optional thumbnails)  
+- Share via email or download locally.  
+
+### G. Multi-Car Support
+- Add multiple cars under one user account.  
+- Switch easily between vehicles in dashboard.  
+
+### H. Mechanic Finder (MVP-lite)
+- Static map view showing nearby garages (use Google Maps API).  
+- Simple info cards: name, phone, address, rating.  
+
+---
+
+## 6. Non-Functional Requirements
+
+| Category | Requirement |
+|-----------|--------------|
+| **Performance** | App loads main dashboard in <2s; OCR under 5s avg. |
+| **Reliability** | Syncs all data with Firebase; local caching for offline access. |
+| **Scalability** | Must handle 50,000+ users without backend modification. |
+| **Security** | Firebase Auth + Firestore rules per user ID; no public endpoints. |
+| **Usability** | Designed for single-thumb use; large touch targets; clear iconography. |
+| **Platform** | Mobile-first; React Native cross-platform (iOS/Android). |
+
+---
+
+## 7. Technical Architecture
+
+**Frontend:** React Native  
+**Backend:** Firebase (Auth, Firestore, Cloud Functions)  
+**OCR:** Google Cloud Vision API  
+**Notifications:** Firebase Cloud Messaging  
+**PDF Generator:** React-PDF or serverless PDFKit  
+**Maps Integration:** Google Maps API (Places + Static Maps)  
+
+---
+
+## 8. UI/UX Requirements
+
+**Design Style:** Minimalist, light theme first; focus on clarity and contrast.  
+
+**Main Screens:**
+1. Login / Onboarding  
+2. Dashboard (per car) – mileage, next service, quick add buttons  
+3. Timeline View  
+4. Add Service Record  
+5. Photo Upload / OCR Flow  
+6. Export & Settings  
+
+**Color Codes:**  
+- Green (#4CAF50): completed  
+- Orange (#FF9800): upcoming  
+- Red (#F44336): overdue  
+- Gray (#9E9E9E): neutral elements  
+
+**Fonts:** Inter or Roboto (system default for performance)  
+
+---
+
+## 9. Future Features (Post-MVP Backlog)
+- In-app mechanic booking.  
+- Cloud backup + sync between devices.  
+- Predictive analytics (based on driving patterns).  
+- Garage partner portal.  
+- Insurance/registration reminders.  
+
+---
+
+## 10. KPIs for MVP Success
+- 1,000 downloads within first 3 months.  
+- >50% of users upload at least one odometer photo.  
+- >40% set up more than one reminder.  
+- <2% crash rate.  
+
+---
+
+## 11. Timeline (Solo Founder Feasible Plan)
+
+| Week | Deliverable |
+|------|--------------|
+| 1 | Setup Firebase, Auth, and base UI (React Native) |
+| 2 | Add car CRUD + OCR integration |
+| 3 | Implement reminders + timeline view |
+| 4 | PDF export + testing + bug fixes |
+| 5 | Beta release |

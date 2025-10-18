@@ -1,0 +1,46 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: light;
+}
+
+body {
+  @apply bg-slate-950 text-slate-100;
+  font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+}
+
+a {
+  @apply text-sky-400 hover:text-sky-300;
+}
+
+button {
+  @apply font-medium;
+}
+
+input,
+select,
+textarea {
+  @apply bg-slate-900 text-slate-100 border border-slate-700 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent transition;
+}
+
+.card {
+  @apply rounded-xl border border-slate-800 bg-slate-950/60 shadow-lg shadow-slate-950/40 backdrop-blur;
+}
+
+.badge {
+  @apply inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold uppercase tracking-wide;
+}
+
+.badge-success {
+  @apply badge bg-success/20 text-success ring-1 ring-inset ring-success/40;
+}
+
+.badge-warning {
+  @apply badge bg-warning/20 text-warning ring-1 ring-inset ring-warning/40;
+}
+
+.badge-danger {
+  @apply badge bg-danger/20 text-danger ring-1 ring-inset ring-danger/40;
+}

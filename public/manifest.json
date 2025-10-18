@@ -1,0 +1,10 @@
+{
+  "name": "AutoSync",
+  "short_name": "AutoSync",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#020617",
+  "theme_color": "#38bdf8",
+  "description": "Track mileage, maintenance reminders, and service history in one place.",
+  "icons": []
+}
