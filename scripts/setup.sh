@@ -1,14 +1,16 @@
 #!/usr/bin/env bash
-set -e
+set -euo pipefail
 
-# Pin Node (recommended). Add .nvmrc to repo with: 20
-if command -v nvm >/dev/null 2>&1; then
-  nvm install
-  nvm use
+echo "Node: $(node -v || true)"
+echo "NPM:  $(npm -v || true)"
+
+# Install deps (prefer lockfile)
+if [ -f package-lock.json ]; then
+  npm ci || npm install
+else
+  npm install
 fi
 
-# Install deps with npm
-npm ci || npm install
-
-# Optional: build to catch type errors early
+# Optional early typecheck/build (comment out if it fails)
 # npm run build || true
+
