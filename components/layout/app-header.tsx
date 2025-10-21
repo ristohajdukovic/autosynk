@@ -35,6 +35,12 @@ export function AppHeader({ session }: AppHeaderProps) {
                 Mechanics
               </Link>
               <Link
+                href="/quotes"
+                className="rounded-md px-3 py-2 transition hover:bg-slate-900"
+              >
+                Quotes
+              </Link>
+              <Link
                 href="/vehicles/new"
                 className="rounded-md px-3 py-2 transition hover:bg-slate-900"
               >

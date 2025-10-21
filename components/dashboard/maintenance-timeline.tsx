@@ -1,6 +1,6 @@
-import { format } from "date-fns";
 import clsx from "clsx";
 import type { MaintenanceStatus } from "@/types/database";
+import { EU } from "@/lib/eu";
 
 type TimelineEvent = {
   id: string;
@@ -84,12 +84,12 @@ export function MaintenanceTimeline({
                       {event.label}
                     </p>
                     <span className="text-xs text-slate-500">
-                      {format(new Date(event.occurred_at), "MMM d, yyyy")}
+                      {EU.formatDateEU(event.occurred_at)}
                     </span>
                   </div>
                   <div className="mt-2 flex flex-wrap items-center gap-3 text-xs text-slate-400">
                     {event.mileage ? (
-                      <span>{event.mileage.toLocaleString()} mi</span>
+                      <span>{EU.formatKm(event.mileage)}</span>
                     ) : null}
                     {event.status ? (
                       <span className="uppercase tracking-wide text-slate-500">

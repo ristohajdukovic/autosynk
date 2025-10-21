@@ -1,24 +1,10 @@
 "use client";
 
-import { useState } from "react";
-import { useForm } from "react-hook-form";
-import { z } from "zod";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useSupabaseClient } from "@supabase/auth-helpers-react";
+import { useState, useTransition } from "react";
+import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-
-const schema = z.object({
-  email: z.string().email("Enter a valid email address"),
-  password: z.string().min(6, "Password must be at least 6 characters"),
-  fullName: z
-    .string()
-    .min(2, "Name must be at least 2 characters")
-    .max(80, "Name must be under 80 characters")
-    .optional()
-});
-
-type FormValues = z.infer<typeof schema>;
+import type { Database } from "@/types/database";
 
 type AuthMode = "login" | "signup";
 
@@ -27,86 +13,77 @@ type EmailAuthFormProps = {
 };
 
 export function EmailAuthForm({ mode }: EmailAuthFormProps) {
-  const supabase = useSupabaseClient();
+  const supabase = createClientComponentClient<Database>();
   const router = useRouter();
-  const [isSubmitting, setSubmitting] = useState(false);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [fullName, setFullName] = useState("");
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [isPending, startTransition] = useTransition();
 
-  const {
-    register,
-    handleSubmit,
-    formState: { errors }
-  } = useForm<FormValues>({
-    resolver: zodResolver(schema),
-    defaultValues: {
-      email: "",
-      password: "",
-      fullName: ""
-    }
-  });
-
-  const onSubmit = handleSubmit(async ({ email, password, fullName }) => {
-    setSubmitting(true);
+  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
     setErrorMessage(null);
+    if (!email || !password) {
+      setErrorMessage("Email and password are required");
+      return;
+    }
 
-    try {
-      if (mode === "signup") {
-        const { error } = await supabase.auth.signUp({
-          email,
-          password,
+    startTransition(async () => {
+      try {
+        if (mode === "signup") {
+          const { error } = await supabase.auth.signUp({
+            email,
+            password,
+            options: {
+              data: {
+                full_name: fullName || null
+              },
+              emailRedirectTo: `${window.location.origin}/auth/callback`
+            }
+          });
+          if (error) throw error;
+          toast.success("Check your inbox to confirm your email");
+        } else {
+          const { error } = await supabase.auth.signInWithPassword({
+            email,
+            password
+          });
+          if (error) throw error;
+          toast.success("Welcome back");
+        }
+
+        router.replace("/dashboard");
+        router.refresh();
+      } catch (error) {
+        const message =
+          error instanceof Error ? error.message : "Authentication failed";
+        setErrorMessage(message);
+        toast.error("Authentication error", { description: message });
+      }
+    });
+  };
+
+  const handleOAuth = async (provider: "google" | "apple") => {
+    startTransition(async () => {
+      try {
+        const { error } = await supabase.auth.signInWithOAuth({
+          provider,
           options: {
-            data: {
-              full_name: fullName
-            },
-            emailRedirectTo: `${window.location.origin}/auth/callback`
+            redirectTo: `${window.location.origin}/auth/callback`
           }
         });
         if (error) throw error;
-        toast.success("Check your inbox to confirm your email");
-        router.replace("/dashboard");
-        router.refresh();
-        return;
+      } catch (error) {
+        const message =
+          error instanceof Error ? error.message : "Unable to start OAuth flow";
+        toast.error("OAuth error", { description: message });
       }
-
-      const { error } = await supabase.auth.signInWithPassword({
-        email,
-        password
-      });
-      if (error) throw error;
-      toast.success("Welcome back");
-      router.replace("/dashboard");
-      router.refresh();
-    } catch (error) {
-      const message =
-        error instanceof Error ? error.message : "Authentication failed";
-      setErrorMessage(message);
-      toast.error("Authentication error", { description: message });
-    } finally {
-      setSubmitting(false);
-    }
-  });
-
-  const handleOAuth = async (provider: "google" | "apple") => {
-    setSubmitting(true);
-    try {
-      const { error } = await supabase.auth.signInWithOAuth({
-        provider,
-        options: {
-          redirectTo: `${window.location.origin}/auth/callback`
-        }
-      });
-      if (error) throw error;
-    } catch (error) {
-      const message =
-        error instanceof Error ? error.message : "Unable to start OAuth flow";
-      toast.error("OAuth error", { description: message });
-    } finally {
-      setSubmitting(false);
-    }
+    });
   };
 
   return (
-    <form onSubmit={onSubmit} className="space-y-6">
+    <form onSubmit={handleSubmit} className="space-y-6" noValidate>
       <div className="space-y-4">
         {mode === "signup" && (
           <div className="space-y-2">
@@ -116,13 +93,11 @@ export function EmailAuthForm({ mode }: EmailAuthFormProps) {
             <input
               type="text"
               placeholder="Alex Driver"
-              {...register("fullName")}
+              value={fullName}
+              onChange={(event) => setFullName(event.target.value)}
               autoComplete="name"
               className="w-full"
             />
-            {errors.fullName && (
-              <p className="text-sm text-danger">{errors.fullName.message}</p>
-            )}
           </div>
         )}
 
@@ -133,13 +108,12 @@ export function EmailAuthForm({ mode }: EmailAuthFormProps) {
           <input
             type="email"
             placeholder="you@email.com"
-            {...register("email")}
+            value={email}
+            onChange={(event) => setEmail(event.target.value)}
             autoComplete="email"
             className="w-full"
+            required
           />
-          {errors.email && (
-            <p className="text-sm text-danger">{errors.email.message}</p>
-          )}
         </div>
 
         <div className="space-y-2">
@@ -149,15 +123,14 @@ export function EmailAuthForm({ mode }: EmailAuthFormProps) {
           <input
             type="password"
             placeholder="********"
-            {...register("password")}
+            value={password}
+            onChange={(event) => setPassword(event.target.value)}
             autoComplete={
               mode === "signup" ? "new-password" : "current-password"
             }
             className="w-full"
+            required
           />
-          {errors.password && (
-            <p className="text-sm text-danger">{errors.password.message}</p>
-          )}
         </div>
       </div>
 
@@ -167,11 +140,13 @@ export function EmailAuthForm({ mode }: EmailAuthFormProps) {
 
       <button
         type="submit"
-        disabled={isSubmitting}
+        disabled={isPending || !email || !password}
         className="w-full rounded-lg bg-sky-500 px-4 py-2 text-sm font-semibold text-slate-950 transition hover:bg-sky-400 disabled:opacity-60"
       >
-        {isSubmitting
-          ? "Just a moment..."
+        {isPending
+          ? mode === "signup"
+            ? "Creating account..."
+            : "Signing in..."
           : mode === "signup"
             ? "Create account"
             : "Log in"}
@@ -187,7 +162,7 @@ export function EmailAuthForm({ mode }: EmailAuthFormProps) {
         <button
           type="button"
           onClick={() => handleOAuth("google")}
-          disabled={isSubmitting}
+          disabled={isPending}
           className="rounded-lg border border-slate-800 px-4 py-2 text-sm font-semibold text-slate-200 transition hover:bg-slate-900 disabled:opacity-60"
         >
           Continue with Google
@@ -195,7 +170,7 @@ export function EmailAuthForm({ mode }: EmailAuthFormProps) {
         <button
           type="button"
           onClick={() => handleOAuth("apple")}
-          disabled={isSubmitting}
+          disabled={isPending}
           className="rounded-lg border border-slate-800 px-4 py-2 text-sm font-semibold text-slate-200 transition hover:bg-slate-900 disabled:opacity-60"
         >
           Continue with Apple

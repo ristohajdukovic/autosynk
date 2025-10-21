@@ -1,6 +1,6 @@
 import Link from "next/link";
-import { format } from "date-fns";
 import type { MaintenanceStatus } from "@/types/database";
+import { EU } from "@/lib/eu";
 
 type VehicleCardProps = {
   vehicle: {
@@ -54,13 +54,20 @@ export function VehicleCard({ vehicle }: VehicleCardProps) {
     vehicle.maintenance_tasks?.filter((task) => task.status === "upcoming")
       ?.length ?? 0;
 
+  const vehicleTitle =
+    vehicle.nickname ??
+    `${vehicle.year ?? ""} ${vehicle.make} ${vehicle.model}`.trim();
+
   return (
-    <Link href={`/vehicles/${vehicle.id}`} className="card group flex flex-col gap-4 p-6 transition hover:border-slate-700">
-      <div className="flex items-start justify-between gap-4">
+    <div className="card flex flex-col gap-5 p-6">
+      <div className="flex flex-wrap items-start justify-between gap-4">
         <div>
-          <h3 className="text-xl font-semibold text-slate-100">
-            {vehicle.nickname ?? `${vehicle.year ?? ""} ${vehicle.make} ${vehicle.model}`.trim()}
-          </h3>
+          <Link
+            href={`/vehicles/${vehicle.id}`}
+            className="text-xl font-semibold text-slate-100 hover:text-sky-300"
+          >
+            {vehicleTitle}
+          </Link>
           <p className="text-xs uppercase tracking-wide text-slate-500">
             {vehicle.make} - {vehicle.model}
             {vehicle.year ? ` - ${vehicle.year}` : ""}
@@ -77,17 +84,19 @@ export function VehicleCard({ vehicle }: VehicleCardProps) {
         <div className="flex items-center justify-between rounded-lg border border-slate-800 bg-slate-900/30 px-3 py-2">
           <div>
             <span className="text-xs uppercase tracking-wide text-slate-500">
-              Current mileage
+              Current odometer
             </span>
             <p className="text-base font-semibold text-slate-100">
-              {latestOdometer?.mileage?.toLocaleString() ??
-                vehicle.base_mileage?.toLocaleString() ??
-                "Not set"}
+              {latestOdometer?.mileage
+                ? EU.formatKm(latestOdometer.mileage)
+                : vehicle.base_mileage
+                  ? EU.formatKm(vehicle.base_mileage)
+                  : "Not set"}
             </p>
           </div>
           <div className="text-right text-xs text-slate-500">
             {latestOdometer
-              ? `Updated ${format(new Date(latestOdometer.recorded_at), "MMM d")}`
+              ? `Updated ${EU.formatDateEU(latestOdometer.recorded_at)}`
               : "Log a photo"}
           </div>
         </div>
@@ -120,20 +129,32 @@ export function VehicleCard({ vehicle }: VehicleCardProps) {
             </span>
             <p className="text-base font-semibold text-slate-100">
               {lastService
-                ? `${lastService.title} - ${format(new Date(lastService.service_date), "MMM d, yyyy")}`
+                ? `${lastService.title} - ${EU.formatDateEU(lastService.service_date)}`
                 : "Add a record"}
             </p>
           </div>
           {lastService?.mileage && (
             <span className="text-xs text-slate-500">
-              {lastService.mileage.toLocaleString()} mi
+              {EU.formatKm(lastService.mileage)}
             </span>
           )}
         </div>
       </div>
-      <span className="text-right text-xs font-semibold uppercase tracking-wide text-sky-300 opacity-0 transition group-hover:opacity-100">
-        Manage vehicle ->
-      </span>
-    </Link>
+
+      <div className="flex flex-wrap justify-end gap-2 text-xs font-semibold uppercase tracking-wide">
+        <Link
+          href={`/vehicles/${vehicle.id}`}
+          className="rounded-md border border-slate-800 px-3 py-1.5 text-slate-300 transition hover:bg-slate-900"
+        >
+          View details
+        </Link>
+        <Link
+          href={`/vehicles/${vehicle.id}/manage`}
+          className="rounded-md bg-sky-500 px-3 py-1.5 text-slate-950 transition hover:bg-sky-400"
+        >
+          Manage vehicle
+        </Link>
+      </div>
+    </div>
   );
 }

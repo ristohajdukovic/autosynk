@@ -1,10 +1,24 @@
-import { format } from "date-fns";
 import type { Database } from "@/types/database";
+import { EU } from "@/lib/eu";
 
 type ServiceRecord = Database["public"]["Tables"]["service_records"]["Row"];
 
 type ServiceRecordTableProps = {
   records: ServiceRecord[];
+};
+
+const provenanceLabels: Record<string, string> = {
+  manual: "Manual",
+  user_verified_receipt: "Receipt verified",
+  odometer_photo_verified: "Odometer photo",
+  shop_verified_api: "Shop verified"
+};
+
+const provenanceClasses: Record<string, string> = {
+  manual: "badge",
+  user_verified_receipt: "badge badge-success",
+  odometer_photo_verified: "badge badge-warning",
+  shop_verified_api: "badge badge-success"
 };
 
 export function ServiceRecordTable({ records }: ServiceRecordTableProps) {
@@ -38,8 +52,9 @@ export function ServiceRecordTable({ records }: ServiceRecordTableProps) {
               <tr>
                 <th className="px-4 py-3 text-left font-semibold">Service</th>
                 <th className="px-4 py-3 text-left font-semibold">Date</th>
-                <th className="px-4 py-3 text-left font-semibold">Mileage</th>
-                <th className="px-4 py-3 text-left font-semibold">Cost</th>
+                <th className="px-4 py-3 text-left font-semibold">Kilometres</th>
+                <th className="px-4 py-3 text-left font-semibold">Cost (EUR)</th>
+                <th className="px-4 py-3 text-left font-semibold">Evidence</th>
                 <th className="px-4 py-3 text-left font-semibold">Notes</th>
               </tr>
             </thead>
@@ -50,15 +65,25 @@ export function ServiceRecordTable({ records }: ServiceRecordTableProps) {
                     {record.title}
                   </td>
                   <td className="px-4 py-3 text-slate-300">
-                    {format(new Date(record.service_date), "MMM d, yyyy")}
+                    {EU.formatDateEU(record.service_date)}
                   </td>
                   <td className="px-4 py-3 text-slate-300">
-                    {record.mileage
-                      ? `${record.mileage.toLocaleString()} mi`
-                      : "-"}
+                    {record.mileage ? EU.formatKm(record.mileage) : "-"}
                   </td>
                   <td className="px-4 py-3 text-slate-300">
-                    {record.cost ? `$${record.cost.toFixed(2)}` : "-"}
+                    {record.cost ? EU.formatEUR(record.cost) : "-"}
+                  </td>
+                  <td className="px-4 py-3 text-slate-300">
+                    <span
+                      className={
+                        provenanceClasses[record.provenance ?? "manual"] ??
+                        "badge"
+                      }
+                    >
+                      {provenanceLabels[record.provenance ?? "manual"] ??
+                        record.provenance ??
+                        "Manual"}
+                    </span>
                   </td>
                   <td className="px-4 py-3 text-slate-400">
                     {record.notes ?? "-"}

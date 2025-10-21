@@ -3,10 +3,11 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useSupabaseClient } from "@supabase/auth-helpers-react";
-import { format, addMonths } from "date-fns";
+import { addMonths } from "date-fns";
 import clsx from "clsx";
 import { toast } from "sonner";
 import type { Database, MaintenanceStatus } from "@/types/database";
+import { EU } from "@/lib/eu";
 
 type Task = Database["public"]["Tables"]["maintenance_tasks"]["Row"];
 
@@ -24,10 +25,16 @@ export function MaintenanceTaskList({ tasks }: MaintenanceTaskListProps) {
   const router = useRouter();
   const supabase = useSupabaseClient<Database>();
   const [isWorking, setIsWorking] = useState<string | null>(null);
+  const [quoteTask, setQuoteTask] = useState<Task | null>(null);
+  const [quoteDetails, setQuoteDetails] = useState("");
+  const [quoteCity, setQuoteCity] = useState("");
+  const [quoteCountry, setQuoteCountry] = useState<string>(EU.COUNTRIES[0]);
+  const [isQuoteOpen, setQuoteOpen] = useState(false);
+  const [isSubmittingQuote, setSubmittingQuote] = useState(false);
 
   const markCompleted = async (task: Task) => {
     const mileageInput = window.prompt(
-      "Enter mileage at completion (optional)",
+      "Enter odometer reading in kilometres (optional)",
       task.next_due_mileage?.toString() ?? ""
     );
     const mileageValue =
@@ -84,6 +91,49 @@ export function MaintenanceTaskList({ tasks }: MaintenanceTaskListProps) {
 
     toast.success("Task reset to upcoming");
     router.refresh();
+  };
+
+  const openQuoteModal = (task: Task) => {
+    setQuoteTask(task);
+    setQuoteCountry(EU.COUNTRIES[0]);
+    setQuoteDetails("");
+    setQuoteCity("");
+    setQuoteOpen(true);
+  };
+
+  const closeQuoteModal = () => {
+    setQuoteOpen(false);
+    setQuoteTask(null);
+    setSubmittingQuote(false);
+  };
+
+  const submitQuoteRequest = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    if (!quoteTask) return;
+
+    setSubmittingQuote(true);
+    try {
+      const { error } = await supabase.from("quote_requests").insert({
+        vehicle_id: quoteTask.vehicle_id,
+        task_title: quoteTask.title,
+        details: quoteDetails.trim() || null,
+        country_code: quoteCountry,
+        city: quoteCity.trim() || null,
+        created_by: quoteTask.created_by
+      });
+
+      if (error) throw error;
+
+      toast.success("Quote request submitted");
+      closeQuoteModal();
+      router.refresh();
+    } catch (error) {
+      toast.error("Unable to submit quote request", {
+        description:
+          error instanceof Error ? error.message : "Please try again later."
+      });
+      setSubmittingQuote(false);
+    }
   };
 
   if (!tasks.length) {
@@ -151,20 +201,20 @@ export function MaintenanceTaskList({ tasks }: MaintenanceTaskListProps) {
                     Next due date:
                   </span>{" "}
                   {task.next_due_date
-                    ? format(new Date(task.next_due_date), "MMM d, yyyy")
+                    ? EU.formatDateEU(task.next_due_date)
                     : "Not set"}
                 </div>
                 <div>
                   <span className="font-semibold text-slate-300">
-                    Next due mileage:
+                    Next due kilometres:
                   </span>{" "}
                   {task.next_due_mileage
-                    ? `${task.next_due_mileage.toLocaleString()} mi`
+                    ? EU.formatKm(task.next_due_mileage)
                     : "Not set"}
                 </div>
                 {task.interval_miles ? (
                   <div>
-                    Interval: {task.interval_miles.toLocaleString()} miles
+                    Interval: {EU.formatKm(task.interval_miles)}
                   </div>
                 ) : null}
                 {task.interval_months ? (
@@ -191,10 +241,105 @@ export function MaintenanceTaskList({ tasks }: MaintenanceTaskListProps) {
                     Set to upcoming
                   </button>
                 ) : null}
+                <button
+                  type="button"
+                  onClick={() => openQuoteModal(task)}
+                  className="rounded-md border border-slate-800 px-3 py-1.5 text-xs font-semibold text-slate-300 transition hover:bg-slate-900"
+                >
+                  Request quotes
+                </button>
               </div>
             </li>
           ))}
       </ul>
+
+      {isQuoteOpen ? (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/70 px-4 py-8">
+          <div className="card w-full max-w-md space-y-4 p-6">
+            <h3 className="text-lg font-semibold text-slate-100">
+              Request maintenance quotes
+            </h3>
+            <p className="text-xs text-slate-500">
+              Describe the work you need and your location. We&apos;ll notify partners in your region.
+            </p>
+            <form className="space-y-4" onSubmit={submitQuoteRequest}>
+              <div className="space-y-2">
+                <label className="block text-xs font-medium text-slate-400">
+                  Task
+                </label>
+                <input
+                  value={quoteTask?.title ?? ""}
+                  disabled
+                  className="w-full cursor-not-allowed bg-slate-900 text-slate-300"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <label className="block text-xs font-medium text-slate-400">
+                  Country
+                </label>
+                <select
+                  value={quoteCountry}
+                  onChange={(event) => setQuoteCountry(event.target.value)}
+                  className="w-full"
+                >
+                  {EU.COUNTRIES.map((code) => (
+                    <option key={code} value={code}>
+                      {code}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="space-y-2">
+                <label className="block text-xs font-medium text-slate-400">
+                  City
+                </label>
+                <input
+                  type="text"
+                  value={quoteCity}
+                  onChange={(event) => setQuoteCity(event.target.value)}
+                  placeholder="e.g. Berlin"
+                  className="w-full"
+                  required
+                />
+              </div>
+
+              <div className="space-y-2">
+                <label className="block text-xs font-medium text-slate-400">
+                  Details
+                </label>
+                <textarea
+                  rows={4}
+                  value={quoteDetails}
+                  onChange={(event) => setQuoteDetails(event.target.value)}
+                  placeholder="Describe the symptoms, preferred timing, or any parts you have already sourced."
+                  className="w-full"
+                  required
+                />
+              </div>
+
+              <div className="flex justify-end gap-2">
+                <button
+                  type="button"
+                  onClick={closeQuoteModal}
+                  className="rounded-md border border-slate-800 px-4 py-2 text-xs font-semibold text-slate-300 transition hover:bg-slate-900"
+                  disabled={isSubmittingQuote}
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={isSubmittingQuote}
+                  className="rounded-md bg-sky-500 px-4 py-2 text-xs font-semibold text-slate-950 transition hover:bg-sky-400 disabled:opacity-60"
+                >
+                  {isSubmittingQuote ? "Sending..." : "Submit request"}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      ) : null}
     </section>
   );
 }

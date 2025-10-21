@@ -8,6 +8,7 @@ import {
   pdf
 } from "@react-pdf/renderer";
 import { createRouteClient } from "@/lib/supabase/server";
+import { EU } from "@/lib/eu";
 
 const styles = StyleSheet.create({
   page: {
@@ -49,8 +50,19 @@ const styles = StyleSheet.create({
   col: {
     flex: 1,
     fontSize: 10
+  },
+  legendItem: {
+    fontSize: 10,
+    marginBottom: 4
   }
 });
+
+const provenanceLabels: Record<string, string> = {
+  manual: "Manual entry",
+  user_verified_receipt: "Receipt verified",
+  odometer_photo_verified: "Odometer photo verified",
+  shop_verified_api: "Workshop verified (API)"
+};
 
 export async function GET(
   request: Request,
@@ -89,6 +101,19 @@ export async function GET(
     return NextResponse.json({ error: "Vehicle not found" }, { status: 404 });
   }
 
+  const { data: inspection } = await supabase
+    .from("vehicle_inspections")
+    .select("country_code,next_due_date")
+    .eq("vehicle_id", vehicle.id)
+    .order("updated_at", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+
+  const registrationCountry = inspection?.country_code ?? "Not set";
+  const inspectionNextDue = inspection?.next_due_date
+    ? EU.formatDateEU(inspection.next_due_date)
+    : "Not scheduled";
+
   const doc = (
     <Document>
       <Page size="A4" style={styles.page}>
@@ -100,11 +125,11 @@ export async function GET(
           </Text>
           <Text>VIN: {vehicle.vin ?? "Not set"}</Text>
           <Text>
-            Baseline mileage:{" "}
-            {vehicle.base_mileage
-              ? `${vehicle.base_mileage.toLocaleString()} mi`
-              : "Not recorded"}
+            Baseline distance:{" "}
+            {vehicle.base_mileage ? EU.formatKm(vehicle.base_mileage) : "Not recorded"}
           </Text>
+          <Text>Registration country: {registrationCountry}</Text>
+          <Text>Next inspection due: {inspectionNextDue}</Text>
         </View>
 
         <View style={styles.section}>
@@ -112,9 +137,10 @@ export async function GET(
           {vehicle.odometer_entries?.length ? (
             <>
               <View style={styles.tableHeader}>
-                <Text style={[styles.col, { flex: 1.2 }]}>Mileage</Text>
+                <Text style={[styles.col, { flex: 1.2 }]}>Kilometres</Text>
                 <Text style={styles.col}>Recorded</Text>
                 <Text style={styles.col}>Confidence</Text>
+                <Text style={styles.col}>Evidence</Text>
               </View>
               {vehicle.odometer_entries
                 .sort(
@@ -125,15 +151,18 @@ export async function GET(
                 .map((entry) => (
                   <View key={entry.id} style={styles.tableRow}>
                     <Text style={[styles.col, { flex: 1.2 }]}>
-                      {entry.mileage.toLocaleString()} mi
+                      {EU.formatKm(entry.mileage)}
                     </Text>
-                    <Text style={styles.col}>
-                      {new Date(entry.recorded_at).toLocaleDateString()}
-                    </Text>
+                    <Text style={styles.col}>{EU.formatDateEU(entry.recorded_at)}</Text>
                     <Text style={styles.col}>
                       {entry.confidence
                         ? `${Math.round(entry.confidence * 100)}%`
                         : "-"}
+                    </Text>
+                    <Text style={styles.col}>
+                      {provenanceLabels[entry.provenance] ??
+                        entry.provenance ??
+                        "-"}
                     </Text>
                   </View>
                 ))}
@@ -152,14 +181,10 @@ export async function GET(
               <View key={task.id} style={styles.listItem}>
                 <Text>
                   <Text style={styles.label}>{task.title}</Text> - Status:{" "}
-                  {task.status} - Next due mileage:{" "}
-                  {task.next_due_mileage
-                    ? `${task.next_due_mileage.toLocaleString()} mi`
-                    : "-"}{" "}
+                  {task.status} - Next due distance:{" "}
+                  {task.next_due_mileage ? EU.formatKm(task.next_due_mileage) : "-"}{" "}
                   - Next due date:{" "}
-                  {task.next_due_date
-                    ? new Date(task.next_due_date).toLocaleDateString()
-                    : "-"}
+                  {task.next_due_date ? EU.formatDateEU(task.next_due_date) : "-"}
                 </Text>
               </View>
             ))
@@ -177,8 +202,9 @@ export async function GET(
               <View style={styles.tableHeader}>
                 <Text style={[styles.col, { flex: 1.4 }]}>Service</Text>
                 <Text style={styles.col}>Date</Text>
-                <Text style={styles.col}>Mileage</Text>
-                <Text style={styles.col}>Cost</Text>
+                <Text style={styles.col}>Kilometres</Text>
+                <Text style={styles.col}>Cost (EUR)</Text>
+                <Text style={styles.col}>Evidence</Text>
               </View>
               {vehicle.service_records
                 .sort(
@@ -191,16 +217,17 @@ export async function GET(
                     <Text style={[styles.col, { flex: 1.4 }]}>
                       {record.title}
                     </Text>
+                    <Text style={styles.col}>{EU.formatDateEU(record.service_date)}</Text>
                     <Text style={styles.col}>
-                      {new Date(record.service_date).toLocaleDateString()}
+                      {record.mileage ? EU.formatKm(record.mileage) : "-"}
                     </Text>
                     <Text style={styles.col}>
-                      {record.mileage
-                        ? `${record.mileage.toLocaleString()} mi`
-                        : "-"}
+                      {record.cost ? EU.formatEUR(record.cost) : "-"}
                     </Text>
                     <Text style={styles.col}>
-                      {record.cost ? `$${record.cost.toFixed(2)}` : "-"}
+                      {provenanceLabels[record.provenance] ??
+                        record.provenance ??
+                        "-"}
                     </Text>
                   </View>
                 ))}
@@ -210,6 +237,15 @@ export async function GET(
               No service records recorded yet.
             </Text>
           )}
+        </View>
+
+        <View style={styles.section}>
+          <Text style={styles.subheading}>Evidence legend</Text>
+          {Object.entries(provenanceLabels).map(([key, label]) => (
+            <Text key={key} style={styles.legendItem}>
+              • {label}
+            </Text>
+          ))}
         </View>
       </Page>
     </Document>

@@ -1,14 +1,16 @@
 import { notFound, redirect } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
-import { format } from "date-fns";
 import { createServerClient } from "@/lib/supabase/server";
 import { QuickCapturePanel } from "@/components/dashboard/quick-capture-panel";
 import { MaintenanceTimeline } from "@/components/dashboard/maintenance-timeline";
 import { MaintenanceTaskList } from "@/components/vehicles/maintenance-task-list";
 import { ServiceRecordTable } from "@/components/vehicles/service-record-table";
 import { OdometerHistory } from "@/components/vehicles/odometer-history";
+import { VehicleInspectionCard } from "@/components/vehicles/inspection-card";
+import { VehicleForecastCard } from "@/components/vehicles/forecast-card";
 import type { MaintenanceStatus } from "@/types/database";
+import { EU } from "@/lib/eu";
 
 export default async function VehicleDetailPage({
   params
@@ -52,8 +54,34 @@ export default async function VehicleDetailPage({
     notFound();
   }
 
+  const { data: inspectionData } = await supabase
+    .from("vehicle_inspections")
+    .select("country_code,first_registration_date,last_completed_date,next_due_date")
+    .eq("vehicle_id", vehicle.id)
+    .eq("user_id", session.user.id)
+    .order("updated_at", { ascending: false })
+    .limit(1);
+
+  const inspection = inspectionData?.[0] ?? null;
+
+  const { data: countries } = await supabase
+    .from("eu_countries")
+    .select("code, name")
+    .order("name", { ascending: true });
+  const countryOptions =
+    countries ?? EU.COUNTRIES.map((code) => ({ code, name: code }));
+
   const { data: timelineData } = await supabase.rpc("get_timeline_events", {
     p_vehicle_id: vehicle.id
+  });
+
+  const forecastCountry =
+    inspection?.country_code ?? countryOptions[0]?.code ?? "DE";
+
+  const { data: forecastData } = await supabase.rpc("forecast_budget", {
+    p_vehicle_id: vehicle.id,
+    p_country: forecastCountry,
+    p_months: 12
   });
 
   const vehicleMeta = {
@@ -88,22 +116,26 @@ export default async function VehicleDetailPage({
                 `${vehicle.year ?? ""} ${vehicle.make} ${vehicle.model}`.trim()}
             </h1>
             <p className="text-sm text-slate-400">
-              Added {format(new Date(vehicle.created_at), "MMM d, yyyy")}
+              Added {EU.formatDateEU(vehicle.created_at)}
             </p>
             <div className="mt-2 flex flex-wrap items-center gap-3 text-xs uppercase tracking-wide text-slate-500">
               <span className="rounded-full border border-slate-800 px-3 py-1">
                 VIN {vehicle.vin ?? "Not set"}
               </span>
               <span className="rounded-full border border-slate-800 px-3 py-1">
-                Base mileage{" "}
-                {vehicle.base_mileage
-                  ? `${vehicle.base_mileage.toLocaleString()} mi`
-                  : "Not set"}
+                Base distance{" "}
+                {vehicle.base_mileage ? EU.formatKm(vehicle.base_mileage) : "Not set"}
               </span>
             </div>
           </div>
         </div>
         <div className="flex gap-3">
+          <Link
+            href={`/vehicles/${vehicle.id}/manage`}
+            className="rounded-lg border border-slate-800 px-4 py-2 text-sm font-semibold text-slate-200 transition hover:bg-slate-900"
+          >
+            Manage vehicle
+          </Link>
           <Link
             href={`/api/vehicles/${vehicle.id}/export`}
             className="rounded-lg border border-slate-800 px-4 py-2 text-sm font-semibold text-slate-200 transition hover:bg-slate-900"
@@ -118,6 +150,19 @@ export default async function VehicleDetailPage({
           </Link>
         </div>
       </header>
+
+      <VehicleInspectionCard
+        vehicleId={vehicle.id}
+        inspection={inspection}
+        countries={countryOptions}
+      />
+
+      <VehicleForecastCard
+        vehicleId={vehicle.id}
+        country={forecastCountry}
+        months={12}
+        items={forecastData ?? []}
+      />
 
       <section className="grid gap-6 lg:grid-cols-[1.5fr,1fr]">
         <div className="card p-6">

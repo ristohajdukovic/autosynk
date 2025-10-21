@@ -1,8 +1,17 @@
 "use client";
 
-import { Area, AreaChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
+import {
+  Area,
+  AreaChart,
+  CartesianGrid,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis
+} from "recharts";
 import { format } from "date-fns";
 import type { Database } from "@/types/database";
+import { EU } from "@/lib/eu";
 
 type OdometerEntry = Database["public"]["Tables"]["odometer_entries"]["Row"];
 
@@ -17,7 +26,7 @@ export function OdometerHistory({ entries }: OdometerHistoryProps) {
   );
 
   const data = sortedEntries.map((entry) => ({
-    date: format(new Date(entry.recorded_at), "MMM d"),
+    date: format(new Date(entry.recorded_at), "dd.MM"),
     mileage: entry.mileage,
     confidence:
       entry.confidence !== null
@@ -50,7 +59,9 @@ export function OdometerHistory({ entries }: OdometerHistoryProps) {
               <XAxis dataKey="date" stroke="#64748b" />
               <YAxis
                 stroke="#64748b"
-                tickFormatter={(value) => `${(value / 1000).toFixed(0)}k`}
+                tickFormatter={(value: number) =>
+                  `${(value / 1000).toFixed(0)}k km`
+                }
               />
               <Tooltip
                 cursor={{ strokeDasharray: "3 3", stroke: "#334155" }}
@@ -59,6 +70,7 @@ export function OdometerHistory({ entries }: OdometerHistoryProps) {
                   border: "1px solid #1e293b",
                   borderRadius: "0.75rem"
                 }}
+                formatter={(value: number) => [EU.formatKm(value), "Odometer"]}
               />
               <Area
                 type="monotone"
@@ -87,17 +99,38 @@ export function OdometerHistory({ entries }: OdometerHistoryProps) {
             >
               <div>
                 <p className="text-base font-semibold text-slate-100">
-                  {entry.mileage.toLocaleString()} mi
+                  {EU.formatKm(entry.mileage)}
                 </p>
                 <p className="text-xs text-slate-500">
-                  {format(new Date(entry.recorded_at), "MMM d, yyyy")}
+                  {EU.formatDateEU(entry.recorded_at)}
                 </p>
               </div>
-              {entry.confidence !== null ? (
-                <span className="text-xs text-slate-400">
-                  OCR confidence {(entry.confidence * 100).toFixed(0)}%
+              <div className="flex flex-col items-end gap-1 text-xs">
+                {entry.confidence !== null ? (
+                  <span className="text-xs text-slate-400">
+                    OCR confidence {(entry.confidence * 100).toFixed(0)}%
+                  </span>
+                ) : null}
+                <span
+                  className={
+                    entry.provenance === "odometer_photo_verified"
+                      ? "badge badge-warning"
+                      : entry.provenance === "shop_verified_api"
+                        ? "badge badge-success"
+                        : entry.provenance === "user_verified_receipt"
+                          ? "badge badge-success"
+                          : "badge"
+                  }
+                >
+                  {entry.provenance === "odometer_photo_verified"
+                    ? "Photo verified"
+                    : entry.provenance === "user_verified_receipt"
+                      ? "Receipt verified"
+                      : entry.provenance === "shop_verified_api"
+                        ? "Shop verified"
+                        : "Manual"}
                 </span>
-              ) : null}
+              </div>
             </li>
           ))}
       </ul>

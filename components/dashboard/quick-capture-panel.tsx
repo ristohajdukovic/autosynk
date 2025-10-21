@@ -28,7 +28,7 @@ const odometerSchema = z.object({
   vehicleId: z.string().uuid(),
   mileage: z
     .number({
-      invalid_type_error: "Mileage is required"
+      invalid_type_error: "Kilometres is required"
     })
     .min(0),
   confidence: z
@@ -48,7 +48,7 @@ const serviceSchema = z.object({
   serviceDate: z.date(),
   mileage: z
     .number({
-      invalid_type_error: "Mileage must be a number"
+      invalid_type_error: "Kilometres must be a number"
     })
     .min(0)
     .optional(),
@@ -78,9 +78,9 @@ const taskSchema = z.object({
     .min(1)
     .max(60)
     .optional(),
-  nextDueMileage: z
+  nextDueKilometres: z
     .number({
-      invalid_type_error: "Mileage must be numeric"
+      invalid_type_error: "Kilometres must be numeric"
     })
     .min(0)
     .optional(),
@@ -169,6 +169,7 @@ export function QuickCapturePanel({
         recorded_at: data.recordedAt.toISOString(),
         notes: data.notes ?? null,
         photo_url: photoUrl,
+        provenance: photoUrl ? "odometer_photo_verified" : "manual",
         created_by: userId
       });
       if (error) throw error;
@@ -194,6 +195,7 @@ export function QuickCapturePanel({
         cost: data.cost ?? null,
         notes: data.notes ?? null,
         attachments: null,
+        provenance: "manual",
         created_by: userId
       });
       if (error) throw error;
@@ -215,7 +217,7 @@ export function QuickCapturePanel({
         description: data.description ?? null,
         interval_miles: data.intervalMiles ?? null,
         interval_months: data.intervalMonths ?? null,
-        next_due_mileage: data.nextDueMileage ?? null,
+        next_due_mileage: data.nextDueKilometres ?? null,
         next_due_date: data.nextDueDate
           ? data.nextDueDate.toISOString()
           : null,
@@ -296,7 +298,7 @@ export function QuickCapturePanel({
             {...registerOdometer("vehicleId")}
           />
           <NumberField
-            label="Mileage"
+            label="Kilometres"
             placeholder="125000"
             {...registerOdometer("mileage", {
               valueAsNumber: true
@@ -373,7 +375,7 @@ export function QuickCapturePanel({
             })}
           />
           <NumberField
-            label="Mileage"
+            label="Kilometres"
             placeholder="125200"
             {...registerService("mileage", {
               setValueAs: (value) =>
@@ -435,12 +437,12 @@ export function QuickCapturePanel({
             />
           </div>
           <NumberField
-            label="Interval (miles)"
-            placeholder="10000"
-            {...registerTask("intervalMiles", {
-              setValueAs: (value) =>
-                value === "" ? undefined : Number(value)
-            })}
+          label="Interval (km)"
+          placeholder="15000"
+          {...registerTask("intervalMiles", {
+            setValueAs: (value) =>
+              value === "" ? undefined : Number(value)
+          })}
           />
           <NumberField
             label="Interval (months)"
@@ -451,12 +453,12 @@ export function QuickCapturePanel({
             })}
           />
           <NumberField
-            label="Next due mileage"
-            placeholder="135000"
-            {...registerTask("nextDueMileage", {
-              setValueAs: (value) =>
-                value === "" ? undefined : Number(value)
-            })}
+          label="Next due kilometres"
+          placeholder="15000"
+          {...registerTask("nextDueKilometres", {
+            setValueAs: (value) =>
+              value === "" ? undefined : Number(value)
+          })}
           />
           <DateField
             label="Next due date"

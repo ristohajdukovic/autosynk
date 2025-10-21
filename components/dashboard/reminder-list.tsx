@@ -1,5 +1,6 @@
 import { formatDistanceToNow } from "date-fns";
 import type { Database, MaintenanceStatus } from "@/types/database";
+import { EU } from "@/lib/eu";
 
 type Reminder = Database["public"]["Tables"]["maintenance_tasks"]["Row"];
 
@@ -30,7 +31,7 @@ export function ReminderList({ tasks }: ReminderListProps) {
             Smart reminders
           </h2>
           <p className="text-xs text-slate-500">
-            Time and mileage based alerts generated from your maintenance plan.
+            Time and distance based alerts generated from your maintenance plan.
           </p>
         </div>
       </header>
@@ -47,7 +48,7 @@ export function ReminderList({ tasks }: ReminderListProps) {
               ? new Date(task.next_due_date)
               : null;
             const dueMileage = task.next_due_mileage
-              ? `${task.next_due_mileage.toLocaleString()} mi`
+              ? EU.formatKm(task.next_due_mileage)
               : null;
 
             return (

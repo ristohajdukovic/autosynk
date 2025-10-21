@@ -26,7 +26,11 @@ AutoSync is a web-based vehicle maintenance companion. Drivers can log mileage w
 
    Apply `supabase/migrations/0001_init.sql` and `supabase/seed.sql` using the Supabase SQL editor or CLI.
 
-4. **Run the development server**
+4. **Run the remaining migrations**
+
+   Execute every SQL file under `supabase/migrations` in order. You can copy/paste each migration into the Supabase SQL editor, or run `supabase db push` with the Supabase CLI if it is linked to your project.
+
+5. **Run the development server**
 
    ```bash
    npm run dev

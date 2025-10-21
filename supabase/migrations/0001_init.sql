@@ -50,6 +50,14 @@ create table if not exists public.odometer_entries (
   notes text,
   recorded_at timestamptz not null default now(),
   created_at timestamptz not null default now(),
+  provenance text not null default 'manual' check (
+    provenance in (
+      'manual',
+      'odometer_photo_verified',
+      'user_verified_receipt',
+      'shop_verified_api'
+    )
+  ),
   created_by uuid not null references auth.users on delete cascade
 );
 
@@ -73,6 +81,14 @@ create table if not exists public.service_records (
   cost numeric,
   notes text,
   attachments jsonb,
+  provenance text not null default 'manual' check (
+    provenance in (
+      'manual',
+      'user_verified_receipt',
+      'odometer_photo_verified',
+      'shop_verified_api'
+    )
+  ),
   created_at timestamptz not null default now(),
   created_by uuid not null references auth.users on delete cascade
 );

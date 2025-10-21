@@ -88,6 +88,7 @@ export interface Database {
           notes: string | null;
           recorded_at: string;
           created_at: string;
+          provenance: string;
           created_by: string;
         };
         Insert: {
@@ -99,6 +100,7 @@ export interface Database {
           notes?: string | null;
           recorded_at?: string;
           created_at?: string;
+          provenance?: string;
           created_by: string;
         };
         Update: {
@@ -110,6 +112,7 @@ export interface Database {
           notes?: string | null;
           recorded_at?: string;
           created_at?: string;
+          provenance?: string;
           created_by?: string;
         };
       };
@@ -123,6 +126,7 @@ export interface Database {
           cost: number | null;
           notes: string | null;
           attachments: Json[] | null;
+          provenance: string;
           created_at: string;
           created_by: string;
         };
@@ -135,6 +139,7 @@ export interface Database {
           cost?: number | null;
           notes?: string | null;
           attachments?: Json[] | null;
+          provenance?: string;
           created_at?: string;
           created_by: string;
         };
@@ -147,6 +152,7 @@ export interface Database {
           cost?: number | null;
           notes?: string | null;
           attachments?: Json[] | null;
+          provenance?: string;
           created_at?: string;
           created_by?: string;
         };
@@ -233,6 +239,218 @@ export interface Database {
           created_at?: string;
         };
       };
+      maintenance_templates: {
+        Row: {
+          id: number;
+          make: string;
+          model: string;
+          fuel: string;
+          task: string;
+          interval_km: number | null;
+          interval_months: number | null;
+          notes: string | null;
+        };
+        Insert: {
+          id?: number;
+          make: string;
+          model: string;
+          fuel: string;
+          task: string;
+          interval_km?: number | null;
+          interval_months?: number | null;
+          notes?: string | null;
+        };
+        Update: {
+          id?: number;
+          make?: string;
+          model?: string;
+          fuel?: string;
+          task?: string;
+          interval_km?: number | null;
+          interval_months?: number | null;
+          notes?: string | null;
+        };
+      };
+      eu_countries: {
+        Row: {
+          code: string;
+          name: string;
+        };
+        Insert: {
+          code: string;
+          name: string;
+        };
+        Update: {
+          code?: string;
+          name?: string;
+        };
+      };
+      inspection_rules: {
+        Row: {
+          id: number;
+          country_code: string;
+          vehicle_class: string;
+          first_interval_months: number;
+          repeat_interval_months: number;
+          notes: string | null;
+        };
+        Insert: {
+          id?: number;
+          country_code: string;
+          vehicle_class: string;
+          first_interval_months: number;
+          repeat_interval_months: number;
+          notes?: string | null;
+        };
+        Update: {
+          id?: number;
+          country_code?: string;
+          vehicle_class?: string;
+          first_interval_months?: number;
+          repeat_interval_months?: number;
+          notes?: string | null;
+        };
+      };
+      vehicle_inspections: {
+        Row: {
+          id: string;
+          user_id: string;
+          vehicle_id: string | null;
+          country_code: string;
+          first_registration_date: string;
+          last_completed_date: string | null;
+          next_due_date: string;
+          rule_id: number | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          user_id: string;
+          vehicle_id?: string | null;
+          country_code: string;
+          first_registration_date: string;
+          last_completed_date?: string | null;
+          next_due_date: string;
+          rule_id?: number | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          user_id?: string;
+          vehicle_id?: string | null;
+          country_code?: string;
+          first_registration_date?: string;
+          last_completed_date?: string | null;
+          next_due_date?: string;
+          rule_id?: number | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+      };
+      cost_baselines: {
+        Row: {
+          id: number;
+          country_code: string;
+          labour_index: number;
+          parts_index: number;
+          currency: string;
+          effective_from: string;
+          notes: string | null;
+        };
+        Insert: {
+          id?: number;
+          country_code: string;
+          labour_index?: number;
+          parts_index?: number;
+          currency?: string;
+          effective_from?: string;
+          notes?: string | null;
+        };
+        Update: {
+          id?: number;
+          country_code?: string;
+          labour_index?: number;
+          parts_index?: number;
+          currency?: string;
+          effective_from?: string;
+          notes?: string | null;
+        };
+      };
+      budget_forecasts: {
+        Row: {
+          id: string;
+          user_id: string;
+          vehicle_id: string | null;
+          country_code: string;
+          labour_cost_estimate: number | null;
+          parts_cost_estimate: number | null;
+          total_cost_estimate: number | null;
+          horizon_months: number;
+          valid_until: string | null;
+          generated_at: string;
+          notes: string | null;
+        };
+        Insert: {
+          id?: string;
+          user_id: string;
+          vehicle_id?: string | null;
+          country_code: string;
+          labour_cost_estimate?: number | null;
+          parts_cost_estimate?: number | null;
+          total_cost_estimate?: number | null;
+          horizon_months?: number;
+          valid_until?: string | null;
+          generated_at?: string;
+          notes?: string | null;
+        };
+        Update: {
+          id?: string;
+          user_id?: string;
+          vehicle_id?: string | null;
+          country_code?: string;
+          labour_cost_estimate?: number | null;
+          parts_cost_estimate?: number | null;
+          total_cost_estimate?: number | null;
+          horizon_months?: number;
+          valid_until?: string | null;
+          generated_at?: string;
+          notes?: string | null;
+        };
+      };
+      quote_requests: {
+        Row: {
+          id: string;
+          vehicle_id: string | null;
+          task_title: string;
+          details: string | null;
+          country_code: string | null;
+          city: string | null;
+          created_by: string;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          vehicle_id?: string | null;
+          task_title: string;
+          details?: string | null;
+          country_code?: string | null;
+          city?: string | null;
+          created_by: string;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          vehicle_id?: string | null;
+          task_title?: string;
+          details?: string | null;
+          country_code?: string | null;
+          city?: string | null;
+          created_by?: string;
+          created_at?: string;
+        };
+      };
     };
     Functions: {
       get_timeline_events: {
@@ -246,6 +464,44 @@ export interface Database {
           occurred_at: string;
           mileage: number | null;
           status: MaintenanceStatus | null;
+        }[];
+      };
+      seed_tasks_from_template: {
+        Args: {
+          p_vehicle_id: string;
+          p_make: string;
+          p_model: string;
+          p_fuel?: string;
+        };
+        Returns: number;
+      };
+      compute_next_inspection: {
+        Args: {
+          p_country: string;
+          p_first_registration: string;
+          p_last_passed: string;
+        };
+        Returns: string;
+      };
+      upsert_vehicle_inspection: {
+        Args: {
+          p_vehicle_id: string;
+          p_country: string;
+          p_first_registration: string;
+          p_last_passed?: string;
+        };
+        Returns: string;
+      };
+      forecast_budget: {
+        Args: {
+          p_vehicle_id: string;
+          p_country: string;
+          p_months?: number;
+        };
+        Returns: {
+          month: string;
+          estimated_eur: number;
+          breakdown: Json;
         }[];
       };
     };
