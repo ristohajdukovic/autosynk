@@ -3,6 +3,9 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useSupabaseClient } from "@supabase/auth-helpers-react";
+import { Input } from "@/components/ui/input";
+import { Select } from "@/components/ui/select";
+import { Textarea } from "@/components/ui/textarea";
 import { addMonths } from "date-fns";
 import clsx from "clsx";
 import { toast } from "sonner";
@@ -267,7 +270,7 @@ export function MaintenanceTaskList({ tasks }: MaintenanceTaskListProps) {
                 <label className="block text-xs font-medium text-slate-400">
                   Task
                 </label>
-                <input
+                <Input
                   value={quoteTask?.title ?? ""}
                   disabled
                   className="w-full cursor-not-allowed bg-slate-900 text-slate-300"
@@ -278,7 +281,7 @@ export function MaintenanceTaskList({ tasks }: MaintenanceTaskListProps) {
                 <label className="block text-xs font-medium text-slate-400">
                   Country
                 </label>
-                <select
+                <Select
                   value={quoteCountry}
                   onChange={(event) => setQuoteCountry(event.target.value)}
                   className="w-full"
@@ -288,14 +291,14 @@ export function MaintenanceTaskList({ tasks }: MaintenanceTaskListProps) {
                       {code}
                     </option>
                   ))}
-                </select>
+                </Select>
               </div>
 
               <div className="space-y-2">
                 <label className="block text-xs font-medium text-slate-400">
                   City
                 </label>
-                <input
+                <Input
                   type="text"
                   value={quoteCity}
                   onChange={(event) => setQuoteCity(event.target.value)}
@@ -309,7 +312,7 @@ export function MaintenanceTaskList({ tasks }: MaintenanceTaskListProps) {
                 <label className="block text-xs font-medium text-slate-400">
                   Details
                 </label>
-                <textarea
+                <Textarea
                   rows={4}
                   value={quoteDetails}
                   onChange={(event) => setQuoteDetails(event.target.value)}

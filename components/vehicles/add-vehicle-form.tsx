@@ -8,6 +8,10 @@ import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
 import type { Database } from "@/types/database";
+import { Field } from "@/components/ui/field";
+import { Input } from "@/components/ui/input";
+import { Select } from "@/components/ui/select";
+import { Textarea } from "@/components/ui/textarea";
 import { seedVehicleTasks } from "@/lib/vehicles/seed-tasks";
 import { inferFuelType } from "@/lib/vehicles/infer-fuel";
 import { EU } from "@/lib/eu";
@@ -306,7 +310,7 @@ export function AddVehicleForm({ userId }: AddVehicleFormProps) {
     <form className="space-y-5" onSubmit={onSubmit}>
       <div className="grid gap-4 md:grid-cols-2">
         <Field label="Make" error={errors.make?.message}>
-          <input
+          <Input
             placeholder="Select or type make"
             list="vehicle-make-options"
             {...register("make")}
@@ -318,7 +322,7 @@ export function AddVehicleForm({ userId }: AddVehicleFormProps) {
           </datalist>
         </Field>
         <Field label="Model" error={errors.model?.message}>
-          <input
+          <Input
             placeholder="Select or type model"
             list="vehicle-model-options"
             {...register("model")}
@@ -333,7 +337,7 @@ export function AddVehicleForm({ userId }: AddVehicleFormProps) {
 
       <div className="grid gap-4 md:grid-cols-2">
         <Field label="Fuel (optional)">
-          <input
+          <Input
             placeholder="Select or type fuel"
             list="vehicle-fuel-options"
             {...register("fuel")}
@@ -345,7 +349,7 @@ export function AddVehicleForm({ userId }: AddVehicleFormProps) {
           </datalist>
         </Field>
         <Field label="Year" error={errors.year?.message ?? undefined}>
-          <input
+          <Input
             type="number"
             placeholder="2022"
             {...register("year", {
@@ -358,10 +362,10 @@ export function AddVehicleForm({ userId }: AddVehicleFormProps) {
 
       <div className="grid gap-4 md:grid-cols-2">
         <Field label="Nickname" error={errors.nickname?.message ?? undefined}>
-          <input placeholder="Daily Driver" {...register("nickname")} />
+          <Input placeholder="Daily Driver" {...register("nickname")} />
         </Field>
         <Field label="VIN" error={errors.vin?.message ?? undefined}>
-          <input placeholder="1HGCM82633A004352" {...register("vin")} />
+          <Input placeholder="1HGCM82633A004352" {...register("vin")} />
         </Field>
       </div>
 
@@ -370,7 +374,7 @@ export function AddVehicleForm({ userId }: AddVehicleFormProps) {
           label="Registration country"
           error={errors.countryCode?.message ?? undefined}
         >
-          <select
+          <Select
             {...register("countryCode")}
             className="w-full"
             disabled={isLoadingCountries}
@@ -381,25 +385,25 @@ export function AddVehicleForm({ userId }: AddVehicleFormProps) {
                 {country.name}
               </option>
             ))}
-          </select>
+          </Select>
         </Field>
         <Field
           label="First registration date"
           error={errors.firstRegDate?.message ?? undefined}
         >
-          <input type="date" {...register("firstRegDate")} />
+          <Input type="date" {...register("firstRegDate")} />
         </Field>
       </div>
 
       <Field label="Last inspection pass (optional)">
-        <input type="date" {...register("lastPassDate")} />
+        <Input type="date" {...register("lastPassDate")} />
       </Field>
 
       <Field
         label="Base odometer (km)"
         error={errors.baseMileage?.message ?? undefined}
       >
-        <input
+        <Input
           type="number"
           placeholder="124500"
           {...register("baseMileage", {
@@ -410,7 +414,7 @@ export function AddVehicleForm({ userId }: AddVehicleFormProps) {
       </Field>
 
       <Field label="Vehicle photo">
-        <input
+        <Input
           type="file"
           accept="image/*"
           onChange={(event) =>
@@ -438,20 +442,3 @@ export function AddVehicleForm({ userId }: AddVehicleFormProps) {
   );
 }
 
-type FieldProps = {
-  label: string;
-  error?: string;
-  children: React.ReactNode;
-};
-
-function Field({ label, error, children }: FieldProps) {
-  return (
-    <div className="space-y-2">
-      <label className="block text-xs font-medium uppercase tracking-wide text-slate-400">
-        {label}
-      </label>
-      {children}
-      {error ? <p className="text-xs text-danger">{error}</p> : null}
-    </div>
-  );
-}

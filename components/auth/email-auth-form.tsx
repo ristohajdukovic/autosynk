@@ -5,6 +5,8 @@ import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import type { Database } from "@/types/database";
+import { Input } from "@/components/ui/input";
+import { AppRoutes } from "@/lib/constants";
 
 type AuthMode = "login" | "signup";
 
@@ -53,7 +55,7 @@ export function EmailAuthForm({ mode }: EmailAuthFormProps) {
           toast.success("Welcome back");
         }
 
-        router.replace("/dashboard");
+        router.replace(AppRoutes.DASHBOARD);
         router.refresh();
       } catch (error) {
         const message =
@@ -90,7 +92,7 @@ export function EmailAuthForm({ mode }: EmailAuthFormProps) {
             <label className="block text-sm font-medium text-slate-200">
               Full name
             </label>
-            <input
+            <Input
               type="text"
               placeholder="Alex Driver"
               value={fullName}
@@ -105,7 +107,7 @@ export function EmailAuthForm({ mode }: EmailAuthFormProps) {
           <label className="block text-sm font-medium text-slate-200">
             Email address
           </label>
-          <input
+          <Input
             type="email"
             placeholder="you@email.com"
             value={email}
@@ -120,7 +122,7 @@ export function EmailAuthForm({ mode }: EmailAuthFormProps) {
           <label className="block text-sm font-medium text-slate-200">
             Password
           </label>
-          <input
+          <Input
             type="password"
             placeholder="********"
             value={password}

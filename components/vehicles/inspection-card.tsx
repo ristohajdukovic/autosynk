@@ -4,6 +4,9 @@ import { useEffect, useMemo, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { EU } from "@/lib/eu";
+import { Field } from "@/components/ui/field";
+import { Input } from "@/components/ui/input";
+import { Select } from "@/components/ui/select";
 
 type InspectionCardProps = {
   vehicleId: string;
@@ -161,7 +164,7 @@ export function VehicleInspectionCard({
             <label className="block text-xs font-medium uppercase tracking-wide text-slate-400">
               Registration country
             </label>
-            <select
+            <Select
               value={countryCode}
               onChange={(event) => setCountryCode(event.target.value)}
               className="w-full"
@@ -172,12 +175,12 @@ export function VehicleInspectionCard({
                   {country.name}
                 </option>
               ))}
-            </select>
+            </Select>
           </div>
 
           <div className="grid gap-4 md:grid-cols-2">
             <Field label="First registration date">
-              <input
+              <Input
                 type="date"
                 value={firstRegDate}
                 onChange={(event) => setFirstRegDate(event.target.value)}
@@ -185,7 +188,7 @@ export function VehicleInspectionCard({
               />
             </Field>
             <Field label="Last passed inspection (optional)">
-              <input
+              <Input
                 type="date"
                 value={lastPassDate}
                 onChange={(event) => setLastPassDate(event.target.value)}
@@ -232,18 +235,3 @@ export function VehicleInspectionCard({
   );
 }
 
-type FieldProps = {
-  label: string;
-  children: React.ReactNode;
-};
-
-function Field({ label, children }: FieldProps) {
-  return (
-    <div className="space-y-2">
-      <label className="block text-xs font-medium uppercase tracking-wide text-slate-400">
-        {label}
-      </label>
-      {children}
-    </div>
-  );
-}

@@ -3,11 +3,11 @@ import { cookies } from "next/headers";
 import { createRouteHandlerClient } from "@supabase/auth-helpers-nextjs";
 import type { Database } from "@/types/database";
 
-type SeedBody = {
+interface SeedBody {
   make: string;
   model: string;
   fuel?: string | null;
-};
+}
 
 export async function POST(
   request: Request,

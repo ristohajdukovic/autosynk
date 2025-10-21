@@ -8,6 +8,9 @@ import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
 import type { Database } from "@/types/database";
+import { Input } from "@/components/ui/input";
+import { Select } from "@/components/ui/select";
+import { Textarea } from "@/components/ui/textarea";
 
 type VehicleOption = {
   id: string;
@@ -323,7 +326,7 @@ export function QuickCapturePanel({
             <label className="block text-xs font-medium text-slate-400">
               Odometer photo
             </label>
-            <input
+            <Input
               type="file"
               accept="image/*"
               onChange={(event) =>
@@ -335,7 +338,7 @@ export function QuickCapturePanel({
             <label className="block text-xs font-medium text-slate-400">
               Notes
             </label>
-            <textarea
+            <Textarea
               rows={3}
               placeholder="Optional comments"
               {...registerOdometer("notes")}
@@ -395,7 +398,7 @@ export function QuickCapturePanel({
             <label className="block text-xs font-medium text-slate-400">
               Notes
             </label>
-            <textarea
+            <Textarea
               rows={3}
               placeholder="Receipt highlights, shop name, etc."
               {...registerService("notes")}
@@ -430,7 +433,7 @@ export function QuickCapturePanel({
             <label className="block text-xs font-medium text-slate-400">
               Description
             </label>
-            <textarea
+            <Textarea
               rows={3}
               placeholder="Why this matters, parts to check, etc."
               {...registerTask("description")}
@@ -494,14 +497,14 @@ function SelectField({ label, options, ...props }: SelectFieldProps) {
       <label className="block text-xs font-medium text-slate-400">
         {label}
       </label>
-      <select {...props}>
+      <Select {...props}>
         <option value="">Select vehicle</option>
         {options.map((option) => (
           <option key={option.value} value={option.value}>
             {option.label}
           </option>
         ))}
-      </select>
+      </Select>
     </div>
   );
 }
@@ -516,7 +519,7 @@ function TextField({ label, ...props }: TextFieldProps) {
       <label className="block text-xs font-medium text-slate-400">
         {label}
       </label>
-      <input type="text" {...props} />
+      <Input type="text" {...props} />
     </div>
   );
 }
@@ -531,7 +534,7 @@ function NumberField({ label, ...props }: NumberFieldProps) {
       <label className="block text-xs font-medium text-slate-400">
         {label}
       </label>
-      <input type="number" {...props} />
+      <Input type="number" {...props} />
     </div>
   );
 }
@@ -546,7 +549,7 @@ function DateField({ label, ...props }: DateFieldProps) {
       <label className="block text-xs font-medium text-slate-400">
         {label}
       </label>
-      <input type="date" {...props} />
+      <Input type="date" {...props} />
     </div>
   );
 }

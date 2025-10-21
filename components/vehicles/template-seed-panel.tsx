@@ -3,6 +3,7 @@
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
+import { Input } from "@/components/ui/input";
 import { seedVehicleTasks } from "@/lib/vehicles/seed-tasks";
 import { inferFuelType } from "@/lib/vehicles/infer-fuel";
 
@@ -74,7 +75,7 @@ export function TemplateSeedPanel({
         <label className="block text-xs font-medium uppercase tracking-wide text-slate-400">
           Fuel type override (optional)
         </label>
-        <input
+        <Input
           value={fuel}
           onChange={(event) => setFuel(event.target.value)}
           placeholder="EV, HEV, ICE/HEV..."

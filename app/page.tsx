@@ -1,15 +1,14 @@
 import Link from "next/link";
+import { AppRoutes } from "@/lib/constants";
 import { redirect } from "next/navigation";
-import { createServerClient } from "@/lib/supabase/server";
+import { getCachedSession } from "@/lib/supabase/session";
+import { AppRoutes } from "@/lib/constants";
 
 export default async function LandingPage() {
-  const supabase = createServerClient();
-  const {
-    data: { session }
-  } = await supabase.auth.getSession();
+  const session = await getCachedSession();
 
   if (session) {
-    redirect("/dashboard");
+    redirect(AppRoutes.DASHBOARD);
   }
 
   return (
@@ -27,13 +26,13 @@ export default async function LandingPage() {
         </p>
         <div className="mt-10 flex flex-wrap justify-center gap-4">
           <Link
-            href="/signup"
+            href={AppRoutes.SIGNUP}
             className="rounded-lg bg-sky-500 px-5 py-3 text-base font-semibold text-slate-950 transition hover:bg-sky-400"
           >
             Create account
           </Link>
           <Link
-            href="/login"
+            href={AppRoutes.LOGIN}
             className="rounded-lg border border-slate-800 px-5 py-3 text-base font-semibold text-slate-200 transition hover:bg-slate-900"
           >
             Log in
@@ -43,7 +42,7 @@ export default async function LandingPage() {
 
       <section className="grid gap-6 sm:grid-cols-2">
         {landingHighlights.map((item) => (
-          <div key={item.title} className="card p-6">
+          <div key={item.id} className="card p-6">
             <div className="text-sm font-semibold uppercase tracking-wide text-sky-300">
               {item.title}
             </div>
@@ -59,21 +58,25 @@ export default async function LandingPage() {
 
 const landingHighlights = [
   {
+    id: "roadmap",
     title: "Smart maintenance roadmap",
     description:
       "Recommended service intervals and reminders tailored to your vehicle, with quick updates for anything you add manually."
   },
   {
+    id: "uploads",
     title: "Mileage photo uploads",
     description:
       "Upload odometer photos and capture mileage in seconds. Edit values anytime if the OCR confidence is low."
   },
   {
+    id: "logbook",
     title: "Shareable digital logbook",
     description:
       "Centralize service receipts, costs, and notes in a printable timeline you can export as a PDF for buyers or mechanics."
   },
   {
+    id: "mechanics",
     title: "Garage discovery",
     description:
       "Explore nearby recommended mechanics with contact info, ratings, and quick links to map directions."

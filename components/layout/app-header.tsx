@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { AppRoutes } from "@/lib/constants";
 import type { Session } from "@supabase/supabase-js";
 import { SignOutButton } from "@/components/auth/sign-out-button";
 
@@ -10,7 +11,7 @@ export function AppHeader({ session }: AppHeaderProps) {
   return (
     <header className="sticky top-0 z-40 border-b border-slate-800 bg-slate-950/80 backdrop-blur">
       <div className="mx-auto flex w-full max-w-6xl items-center justify-between px-4 py-4 sm:px-6">
-        <Link href="/" className="flex items-center gap-2 text-lg font-semibold">
+        <Link href={AppRoutes.LANDING} className="flex items-center gap-2 text-lg font-semibold">
           <span className="rounded-lg bg-sky-500/10 px-2 py-1 text-sky-300">
             AutoSync
           </span>
@@ -23,25 +24,25 @@ export function AppHeader({ session }: AppHeaderProps) {
           {session ? (
             <>
               <Link
-                href="/dashboard"
+                href={AppRoutes.DASHBOARD}
                 className="rounded-md px-3 py-2 transition hover:bg-slate-900"
               >
                 Dashboard
               </Link>
               <Link
-                href="/mechanics"
+                href={AppRoutes.MECHANICS}
                 className="rounded-md px-3 py-2 transition hover:bg-slate-900"
               >
                 Mechanics
               </Link>
               <Link
-                href="/quotes"
+                href={AppRoutes.QUOTES}
                 className="rounded-md px-3 py-2 transition hover:bg-slate-900"
               >
                 Quotes
               </Link>
               <Link
-                href="/vehicles/new"
+                href={AppRoutes.VEHICLES.NEW}
                 className="rounded-md px-3 py-2 transition hover:bg-slate-900"
               >
                 Add Vehicle
@@ -51,13 +52,13 @@ export function AppHeader({ session }: AppHeaderProps) {
           ) : (
             <>
               <Link
-                href="/login"
+                href={AppRoutes.LOGIN}
                 className="rounded-md px-3 py-2 transition hover:bg-slate-900"
               >
                 Log in
               </Link>
               <Link
-                href="/signup"
+                href={AppRoutes.SIGNUP}
                 className="rounded-md bg-sky-500 px-3 py-2 text-slate-950 hover:bg-sky-400"
               >
                 Get Started

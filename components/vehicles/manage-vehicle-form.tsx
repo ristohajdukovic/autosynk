@@ -1,6 +1,8 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import { Field } from "@/components/ui/field";
+import { Input } from "@/components/ui/input";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 
@@ -79,14 +81,14 @@ export function ManageVehicleForm({ vehicle }: ManageVehicleFormProps) {
 
       <div className="grid gap-4 md:grid-cols-2">
         <Field label="Make">
-          <input
+          <Input
             value={make}
             onChange={(event) => setMake(event.target.value)}
             required
           />
         </Field>
         <Field label="Model">
-          <input
+          <Input
             value={model}
             onChange={(event) => setModel(event.target.value)}
             required
@@ -96,14 +98,14 @@ export function ManageVehicleForm({ vehicle }: ManageVehicleFormProps) {
 
       <div className="grid gap-4 md:grid-cols-2">
         <Field label="Nickname">
-          <input
+          <Input
             value={nickname}
             onChange={(event) => setNickname(event.target.value)}
             placeholder="Daily Driver"
           />
         </Field>
         <Field label="Year">
-          <input
+          <Input
             type="number"
             inputMode="numeric"
             value={year}
@@ -115,14 +117,14 @@ export function ManageVehicleForm({ vehicle }: ManageVehicleFormProps) {
 
       <div className="grid gap-4 md:grid-cols-2">
         <Field label="VIN">
-          <input
+          <Input
             value={vin}
             onChange={(event) => setVin(event.target.value.toUpperCase())}
             placeholder="1HGCM82633A004352"
           />
         </Field>
         <Field label="Base distance (km)">
-          <input
+          <Input
             type="number"
             inputMode="numeric"
             value={baseMileage}
@@ -145,18 +147,3 @@ export function ManageVehicleForm({ vehicle }: ManageVehicleFormProps) {
   );
 }
 
-type FieldProps = {
-  label: string;
-  children: React.ReactNode;
-};
-
-function Field({ label, children }: FieldProps) {
-  return (
-    <div className="space-y-2">
-      <label className="block text-xs font-medium uppercase tracking-wide text-slate-400">
-        {label}
-      </label>
-      {children}
-    </div>
-  );
-}

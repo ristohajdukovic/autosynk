@@ -1,20 +1,45 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import { Inter } from "next/font/google";
-import { createServerClient } from "@/lib/supabase/server";
+import { getCachedSession } from "@/lib/supabase/session";
 import { SupabaseProvider } from "@/components/providers/supabase-provider";
 import { Toaster } from "sonner";
 import { AppHeader } from "@/components/layout/app-header";
 
 const inter = Inter({ subsets: ["latin"] });
 
+const siteTitle = "AutoSync | Smarter Vehicle Maintenance";
+const siteDescription =
+  "Track mileage, manage maintenance, and keep a digital logbook for every vehicle with AutoSync.";
+const siteUrl = "https://autosync.app";
+
 export const metadata: Metadata = {
-  title: "AutoSync | Smarter Vehicle Maintenance",
-  description:
-    "Track mileage, manage maintenance, and keep a digital logbook for every vehicle with AutoSync.",
+  title: siteTitle,
+  description: siteDescription,
   applicationName: "AutoSync",
   manifest: "/manifest.json",
-  authors: [{ name: "AutoSync" }]
+  authors: [{ name: "AutoSync" }],
+  openGraph: {
+    title: siteTitle,
+    description: siteDescription,
+    url: siteUrl,
+    siteName: "AutoSync",
+    locale: "en_US",
+    type: "website"
+    // images: [
+    //   {
+    //     url: `${siteUrl}/og-image.png`,
+    //     width: 1200,
+    //     height: 630
+    //   }
+    // ]
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: siteTitle,
+    description: siteDescription
+    // images: [`${siteUrl}/og-image.png`]
+  }
 };
 
 export default async function RootLayout({
@@ -22,10 +47,7 @@ export default async function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const supabase = createServerClient();
-  const {
-    data: { session }
-  } = await supabase.auth.getSession();
+  const session = await getCachedSession();
 
   return (
     <html lang="en">
